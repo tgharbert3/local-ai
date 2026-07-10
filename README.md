@@ -1,1 +1,1 @@
-# loacl-ai
+#local-ai
