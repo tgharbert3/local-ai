@@ -1,0 +1,66 @@
+Commands:
+	GET
+	SET
+
+Chat Struct:
+	chat[64] chat_id,
+	
+	Message **mesages
+	size_t count
+	size_t capacity
+
+Message Struct:
+	chat_id,
+	message_id,
+	body,
+	size_t body_length
+
+Cache Struct:
+	HashTable *chats_by_id
+
+Get/Set Chat
+Set Message
+
+
+The protocol will be http like:
+	command resource\r\n
+	chat-id\r\n
+	(optional) message-id\r\n
+	(optional) content-length\r\n (needed for SET MESSAGE)
+	\r\n
+
+	The end of the header will be \r\n\r\n
+	The message if passed (SET MESSAGE) will be after the EOH.
+	It will be of length <content-length> in the header.
+
+EX:
+	GET CHAT\r\nchat-id: 123\r\n\r\n
+	SET CHAT\r\nChat-id: 124\r\n\r\n
+
+
+Handling recvs and partial recvs:
+	Cases:
+		Receive full header and message
+		Receive full and no message
+		Receive partial header and no message
+		Receive the last partial message and partial next message
+
+	Receive Buffer:
+		Double the length of a normal message.
+
+	Protocol for reading the receive buf:
+		Read until \r\n\r\n
+		if we receive partial: call recv again
+
+		-We know the number of bytes we receive
+		- Feed the working all the received bytes.
+		- start parsing the received bytes
+		- Call pop_char func and rebuild a buf while parsing 
+		- read until the EOH. 
+		- If GET CHAT call get function
+		- If SET CHAT call the set function
+		- If SET MESSAGE further parse the head to get the length
+
+
+
+
